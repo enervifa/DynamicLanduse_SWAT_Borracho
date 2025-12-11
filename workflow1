@@ -1,0 +1,33 @@
+
+# Workflow 1. Land use change transitions to crease baseline map + manegment schedule
+
+##Step 1 – Input land-use and TRC forestry maps
+Resources:
+General Land-use map (2015).
+Forestry maps for 2004, 2018, and 2021 (LU_2004,LU_2018, LU_2021)
+Forestry-priority soils map (MGAP).
+
+##Step 2 – Harmonise land-use classes and clean attribute tables
+First we cleaned attribute tables for all input layers. Then we used the defined land-use classification scheme to assigned a unique land-use code per class (e.g. as in your Table 2).
+Resources:
+A lookup table (CSV or XLSX)
+For reproducible research, upload:
+
+Optional: a small script or QGIS model used to recode attributes (if you used expressions or field calculator, export that as notes or screenshots).
+
+Cleaned layer with harmonised codes:
+
+
+##Step 3 – Union all time slices to create a multi-year change map.
+We generated the union map using the union tool in QGIS to merge: 2004 forestry map, 2015 general land use (with ESC), 2018 forestry map, 2021 forestry map. This allowed to create polygons representing unique combinations of land use across all layers (homogeneposu numeric coeds). The union result layer is LU_union_2004_2015_2018_2021.shp 
+
+##Step 4 – Assign temporal land-use codes and create 13 final classes
+
+We analysed the union layer to identify unique temporal sequences (e.g. pine forest → pine forest, grassland → pine forest, euca or pine forest → grassland, see table in the manuscript). Using this transitions we assigned a new land-use code that summarises the temporal trajectory for each polygon. Mapped these trajectories using nmeric codes after map union we obtained a total to 13 final classes (see Table 3 in the manuscript appednix).
+
+Classification table (CSV):
+Final land use map 
+
+Step 6 – Link final land-use classes to management types in the model
+After this, we assigmed a .mgt to each of the 13 land-use classes in terms of management and forest dynamics (e.g. persistent plantation, new plantation, conversion to non-forest).
+Example of each .mgt files for each landuse 
