@@ -1,0 +1,24 @@
+Workflow 2. Dynamic .mgt Opschedules in SWAT 
+A. Dynamic changes.
+Purpose: Introducing realistic management variability without altering land-use type.
+Used for: Agricultural areas, pasture, and existing forestry stands.
+
+Management templates for each land use are executed using
+mgt_LUSE.R script 
+This script:
+1. Read original HRU .mgt file
+2. Slect a Magament Operation template randombly selected among templates
+3. Given the selection, map Rotation length (9, 11, 13 years), initial biomass (BIO_INIT), minimum biomass (BIO_MIN) to select values assigned.
+4.Rebuild the .mgt file and save as scenario-specific output.
+
+B. Staggred plantations for foresty land use. These were used in the scenarios. Applied only to HRUs identified as eligible for planting in the forestry-change baseline map.
+Purpose: Simulates realistic plantation expansion, where forestry does not start everywhere in the same year, and stand ages become spatially heterogeneous.
+Output: Scenario-specific .mgt files representing spatially staggered plantation development.
+
+How the script works:
+1. Read original HRU .mgt file
+2. Map ooperation schedule into 25-year blocks (SWAT rotation length)
+3. Detect planting years (operation code = 1)
+4. Randomly reassign planting years from a target set (e.g., years 5, 10, 15)
+5. Swap yearly blocks to match the new planting timing: No simultaneous planting across HRUs
+6. Preserves rotation sequence
