@@ -5,3 +5,5 @@
 2. The GEE codes used to
    a.Find polygons in MAPBIOMAS that are classified as forest (silvopastoral) and pasture from 2003 o 2024 -
    b. Exports polygon-mean and centroid-pixel MODIS signal and match patchid with Subbasin location number
+
+The code of this repository was developed with the assistance of ChatGPT (OpenAI) propting initial code from myself and use it for code structuring and debugging.
