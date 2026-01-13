@@ -2,20 +2,21 @@
 
 // INPUTS
 var catchmentFC = ee.FeatureCollection(
-  'projects/ee-eliananervif/assets/Borracho_subbasin'   ## Subbasins map
+  'projects/ee-eliananervif/assets/Borracho_subbasin'
 );
-var catchment = catchmentFC.geometry().simplify(50);    
+var catchment = catchmentFC.geometry().simplify(50);
 
 // Stable patch polygons
-var patches = ee.FeatureCollection('projects/ee-eliananervif/assets/Locations_');   ## Locations map identified in step a
+var patches = ee.FeatureCollection('projects/ee-eliananervif/assets/Locations_');
 
 // Ensure FeatureCollection
 var patches_fc = ee.FeatureCollection('projects/ee-eliananervif/assets/Locations_');
 
 // Extract individual polygon geometries
+// --- Make sure Locations is a geometry (union of all polygons) ---
 var locGeom = ee.FeatureCollection('projects/ee-eliananervif/assets/Locations_').geometry();
 
-// Just in case -  Convert polygon parts into separate features (single-part polygons) ---
+// --- Convert polygon parts into separate features (single-part polygons) ---
 var patches_split = ee.Image.constant(1).toByte()
   .clip(locGeom)
   .selfMask()
@@ -28,7 +29,8 @@ var patches_split = ee.Image.constant(1).toByte()
     tileScale: 8
   });
 
-// Add unique patch_id to each location
+
+// Add unique patch_id
 var featList = patches_split.toList(patches_split.size());
 var idxList  = ee.List.sequence(1, patches_split.size());
 
@@ -42,15 +44,13 @@ var patches_id = ee.FeatureCollection(
 print('Split patches:', patches_id.size());
 Map.addLayer(patches_id, {}, 'Split patch polygons (patch_id)');
 
-//PROCESSING 
-
-// Time window of the extraction
+// Time window for extraction 
 var startYear = 2004;
 var endYear   = 2024;
 
-// Extract MODIS data  / HiQ products
+// MODIS / HiQ products
 var LAI_IC_ID = 'projects/verselab-398313/assets/HiQ_LAI/wgs_500m_8d'; // band: LAI
-var ET_IC_ID  = 'MODIS/006/MOD16A2';     // Using same as input data for calibration MODIS/006/MOD16A2      // band: ET
+var ET_IC_ID  = 'MODIS/006/MOD16A2';     //Using MODIS/006/MOD16A2                             // band: ET
 
 var CLASS_FIELD = 'class'; //
 
@@ -58,10 +58,9 @@ Map.centerObject(catchment, 9);
 Map.addLayer(catchment, {}, 'Catchment');
 
 var patches = patches_split 
-
-
-// Add numeric patch_id
-
+// =========================================================
+// 1) Add numeric patch_id
+// =========================================================
 var featList = patches.toList(patches.size());
 var idxList  = ee.List.sequence(1, patches.size());
 
@@ -76,15 +75,18 @@ var patches_id = ee.FeatureCollection(
 Map.addLayer(patches_id, {}, 'Patches with patch_id');
 print('Patches with ID:', patches_id.limit(5));
 
-// Export polygons tp a shapefile map
+
+// OPTIONAL: keep only patch_id = 1
+// patches_id = patches_id.filter(ee.Filter.eq('patch_id', 1));
+
+
+//  Export polygons in a map 
 
 Export.table.toDrive({
   collection: patches_id,
-  description: 'Locations_patches_with_patch_id',
+  description: 'Locations_patches_with_patch_id3',
   fileFormat: 'SHP'
 });
-
-
 
 var laiCol = ee.ImageCollection(LAI_IC_ID)
   .filterDate(ee.Date.fromYMD(startYear,1,1),
@@ -95,7 +97,6 @@ var etCol = ee.ImageCollection(ET_IC_ID)
   .filterDate(ee.Date.fromYMD(startYear,1,1),
               ee.Date.fromYMD(endYear,12,31))
   .select('ET');
-
 
 function extractPolygonMean(ic, polys, varName){
   return ic.map(function(img){
@@ -123,9 +124,10 @@ var etPolyTS  = extractPolygonMean(etCol,  patches_id, 'ET');
 
 var tsPoly = laiPolyTS.merge(etPolyTS);
 
+// Export dara in a table
 Export.table.toDrive({
   collection: tsPoly.filter(ee.Filter.notNull(['value'])),
-  description: 'MODIS_LAI_ET_polygonMean_by_patch_id',
+  description: 'MODIS_LAI_ET_polygonMean_by_patch_id3',
   fileFormat: 'CSV'
 });
 
@@ -161,20 +163,17 @@ function extractCentroidTS(ic, centroids, bandName, varName){
   }).flatten();
 }
 
-
 var laiCentTS = extractCentroidTS(laiCol, patch_centroids, 'LAI', 'LAI');
 var etCentTS  = extractCentroidTS(etCol,  patch_centroids, 'ET',  'ET');
 
 var tsCentroid = laiCentTS.merge(etCentTS);
 
-
+// In case the interest is in the centroid using point extraction
 Export.table.toDrive({
   collection: tsCentroid.filter(ee.Filter.notNull(['value'])),
-  description: 'MODIS_LAI_ET_centroidPixel_by_patch_id',
+  description: 'MODIS_LAI_ET_centroidPixel_by_patch_id3',
   fileFormat: 'CSV'
 });
 
-
 print('ET first date:', ee.Date(etCol.first().get('system:time_start')));
 print('ET last date:',  ee.Date(etCol.sort('system:time_start', false).first().get('system:time_start')));
-
