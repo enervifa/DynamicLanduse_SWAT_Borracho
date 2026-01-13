@@ -1,0 +1,110 @@
+
+// Script to obtain stable classifeid pixels form  MapBiomas 20004-2024
+//1. Borracho_stable_forestry_30m.tif  (class 9)
+//2.Borracho_stable_pasture_30m.tif   (class 12)
+
+
+// Load inputs
+var catchment = ee.FeatureCollection('projects/ee-eliananervif/assets/Borracho_subbasin');
+var studyArea = catchment.geometry();
+
+var MB_ASSET = 'projects/MapBiomas_Pampa/public/collection3/mapbiomas_pampa_collection3_integration_v1';
+
+// MapBiomas Pampa legend codes
+var PLANTATION_CLASSES = [9];   // forestry / plantations
+var PASTURE_CLASSES    = [12];  // pasture
+
+// Select a persistent window
+var tenureStartYear = 2004;
+var tenureEndYear   = 2024;
+
+// 1) MapBiomas image + available years
+var MB_IMAGE = ee.Image(MB_ASSET);
+
+var bandYears = ee.List(MB_IMAGE.bandNames()).map(function(b){
+  return ee.Number.parse(ee.String(b).replace('classification_', ''));
+}).sort();
+
+var minAvailY = ee.Number(bandYears.get(0));
+var maxAvailY = ee.Number(bandYears.get(bandYears.size().subtract(1)));
+
+var effStartY = ee.Number(tenureStartYear).max(minAvailY);
+var effEndY   = ee.Number(tenureEndYear).min(maxAvailY);
+
+print('Effective persistent window:', effStartY, '-', effEndY);
+
+// helpers
+function bandNameForYear(y) {
+  return ee.String('classification_').cat(ee.Number(y).format('%.0f'));
+}
+
+var YEARS = ee.List.sequence(effStartY, effEndY);
+
+// Build per-year image collection (single band "class")
+var mbYearIC = ee.ImageCollection(
+  YEARS.map(function(y){
+    return MB_IMAGE.select(bandNameForYear(y))
+      .rename('class')
+      .set('year', ee.Number(y).toInt())
+      .clip(studyArea);
+  })
+);
+
+// helper: counts how many years each pixel is in classList
+function yearsWithClasses(ic, classList) {
+  classList = ee.List(classList);
+  var perYearBin = ic.map(function(img){
+    var cls = img.select('class');
+    var eqIC = ee.ImageCollection(classList.map(function(c){
+      return cls.eq(ee.Number(c));
+    }));
+    return eqIC.max().rename('bin').uint8(); // OR across codes
+  });
+  return ee.ImageCollection(perYearBin).sum(); // count of years in target class
+}
+
+//Filter Persistent masks (every year in window is the class)
+var nYears = effEndY.subtract(effStartY).add(1).int();
+
+var plantationYears = yearsWithClasses(mbYearIC, PLANTATION_CLASSES);
+var pastureYears    = yearsWithClasses(mbYearIC, PASTURE_CLASSES);
+
+var plantationPersistent = plantationYears.eq(nYears);
+var pasturePersistent    = pastureYears.eq(nYears);
+
+// Exclusive (avoid overlap, just in case)
+var both = plantationPersistent.and(pasturePersistent);
+plantationPersistent = plantationPersistent.and(both.not());
+pasturePersistent    = pasturePersistent.and(both.not());
+
+// Convert to 0/1 byte images, clipped to study area, and do o or 1
+var forestry30m = ee.Image(plantationPersistent).rename('FORESTRY').uint8().clip(studyArea);
+var pasture30m  = ee.Image(pasturePersistent   ).rename('PASTURE' ).uint8().clip(studyArea);
+
+// Console display
+Map.centerObject(catchment, 8);
+Map.addLayer(forestry30m.selfMask(), {min: 0, max: 1, palette: ['00FF00']}, 'Stable FORESTRY (30m)', true);
+Map.addLayer(pasture30m.selfMask(),  {min: 0, max: 1, palette: ['FFD700']}, 'Stable PASTURE (30m)', true);
+
+//Export as .TIF file
+Export.image.toDrive({
+  image: forestry30m,
+  description: 'Borrachi_stable_forestry_30m',
+  fileNamePrefix: 'Borrachi_stable_forestry_30m',
+  region: studyArea,
+  scale: 30,
+  maxPixels: 1e13,
+  fileFormat: 'GeoTIFF'
+});
+
+//EPSG:4326
+
+Export.image.toDrive({
+  image: pasture30m,
+  description: 'Borrachi_stable_pasture_30m',
+  fileNamePrefix: 'Borrachi_stable_pasture_30m',
+  region: studyArea,
+  scale: 30,
+  maxPixels: 1e13,
+  fileFormat: 'GeoTIFF'
+});
