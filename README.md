@@ -7,4 +7,4 @@
    a.Find polygons in MAPBIOMAS that are classified as forest (silvopastoral) and pasture from 2003 o 2024 -
    b. Exports polygon-mean and centroid-pixel MODIS signal and match patchid with Subbasin location number
 
-The code of this repository was developed with the assistance of ChatGPT (OpenAI) propting initial code developed by myself and use it for code structuring, cleaning and debugging.
+The code of this repository was originally developed by myself and using the assistance of ChatGPT (OpenAI) for code structuring, cleaning and debugging.
