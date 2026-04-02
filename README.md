@@ -1,4 +1,4 @@
-# DynamicLanduse_SWAT_Borracho
+# DynamicLanduse_SWAT
 
 1. Provides the input data and results of the workflow used to (1) generate spatially explicit transition maps of forestry change across the Tacuarembó River Catchment (TRC) and (2) implement dynamic land-use and staggered plantations in SWAT through automated modification of HRU management files (.mgt).
 <img src="Figure_5_Sup_w.png" alt="Strategy description" width="500">
