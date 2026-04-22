@@ -1,0 +1,152 @@
+Adaptacion para AGUA para embalse Casupa Flor
+
+1.archivos .mgt, .hru y .gw
+2. grep numeros o codigo anterior
+3. cambiar por AGUA
+
+library(tidyverse)
+library(readr)
+
+replace_and_truncate <- function(input, replace, start_line) {
+  new_content <- c(input[1:(start_line - 1)], replace)
+  return(new_content)
+}
+
+##manejo para agua a modificar por flor
+AGUA <- c(
+  "Management Operations:",
+  "               0    | NROT: number of years of rotation",
+  "Operation Schedule:"
+)
+
+### donde
+input_directory  <- "C:/Users/Lenovo/Downloads/Rev_695_source/mgt_test"      # archivos originales
+output_directory <- "C:/Users/Lenovo/Downloads/Rev_695_source/mgt_test_agua"   # salida
+dir.create(output_directory, showWarnings = FALSE, recursive = TRUE)
+
+#========================================================
+# 1) MODIFICAR LOS .MGT
+# si tienen GRAS, cambiar GRAS por AGUA
+# o cambiar ciertos numeros de archivos de hru
+# reemplazar manejo por bloque AGUA
+#========================================================
+setwd(input_directory)
+
+list_of_files <- list.files(input_directory, pattern = "\\.mgt$", full.names = FALSE)
+# added
+# Ejemplo: target_base_names <- c("000010001", "000020015")
+target_base_names <- c("000110018")
+#target_base_names <- NULL ######si no es por numero
+
+
+## if target_base_names is not NULL then match files names and .mgt extension
+if (!is.null(target_base_names)) {
+  list_of_files <- list_of_files[
+    list_of_files %in% paste0(target_base_names, ".mgt")
+  ]
+}
+
+for (i in seq_along(list_of_files)) {
+  
+  file_path <- file.path(input_directory, list_of_files[i])
+  file_content <- read_lines(file_path)
+  
+  # Solo si el archivo tiene GRAS, se modifica
+  # si target_base_names is not null modificar todos en la list of files
+  if (!is.null(target_base_names) || any(grepl("\\bGRAS\\b", file_content))) {
+  
+  
+  
+  
+  if (any(grepl("\\bGRAS\\b", file_content))) {
+    
+    # Cambiar GRAS por AGUA en todo el archivo
+    file_content <- gsub("\\bGRAS\\b", "AGUA", file_content)
+    
+    # Buscar donde empieza el bloque de manejo
+    management_start <- grep("Management Operations:", file_content)
+    
+    if (length(management_start) > 0) {
+      modified_content <- replace_and_truncate(
+        input = file_content,
+        replace = AGUA,
+        start_line = management_start[1]
+      )
+    } else {
+      modified_content <- file_content
+    }
+    
+    # Guardar archivo modificado
+    write_lines(
+      modified_content,
+      file.path(output_directory, list_of_files[i])
+    )
+    
+    cat("Modified and saved .mgt:", list_of_files[i], "\n")
+  }
+}
+}
+
+
+##En base a los modificados, modificar los demas archivos relacionados si es de interes 
+mgt_files_modified <- list.files(output_directory, pattern = "\\.mgt$", full.names = FALSE)
+base_names <- sub("\\.mgt$", "", mgt_files_modified)
+
+
+directory_all <- input_directory
+
+list_of_files_all <- list.files(
+  path = directory_all,
+  pattern = "\\.(hru|gw)$",
+  full.names = TRUE
+)
+
+# Match exacto por basename, no por texto parcial
+matched_files <- list_of_files_all[
+  tools::file_path_sans_ext(basename(list_of_files_all)) %in% base_names
+]
+
+### usar el for
+for (i in seq_along(list_of_files)) {
+  
+  file_path <- file.path(input_directory, list_of_files[i])
+  file_content <- read_lines(file_path)
+  
+  if (!is.null(target_base_names) || any(grepl("\\bGRAS\\b", file_content))) {
+    
+    # reemplazo GRAS -> AGUA
+    file_content <- gsub("\\bGRAS\\b", "AGUA", file_content)
+    
+    management_start <- grep("Management Operations:", file_content)
+    
+    if (length(management_start) > 0) {
+      modified_content <- replace_and_truncate(
+        input = file_content,
+        replace = AGUA,
+        start_line = management_start[1]
+      )
+    } else {
+      modified_content <- file_content
+    }
+    
+    write_lines(
+      modified_content,
+      file.path(output_directory, list_of_files[i])
+    )
+    
+    cat("Modified and saved .mgt:", list_of_files[i], "\n")
+  }
+}
+
+
+#Chequeo final
+files_check <- list.files(output_directory, pattern = "\\.(mgt|hru|gw)$", full.names = TRUE)
+
+check_summary <- tibble(
+  file = basename(files_check),
+  has_GRAS  = sapply(files_check, function(f) any(grepl("\\bGRAS\\b", read_lines(f)))),
+  has_AGUA = sapply(files_check, function(f) any(grepl("\\bAGUA\\b", read_lines(f))))
+)
+
+print(check_summary)
+
