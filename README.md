@@ -17,12 +17,12 @@ The core workflow has two stages:
 1.2. **Dynamic management operations in space and time:** modification of SWAT HRU management files (`.mgt`) to represent staggered plantations.
 
 1. Spatial land-use transitions (Workflow 1)
- 1.1 Documents the preparation of a multi-year land-use transition map using:
+1.1 Documents the preparation of a multi-year land-use transition map using:
 - General land-use information (2015).
 - Forestry maps for 2004, 2018 and 2021.
 - Forestry-priority soils.
 
-The described process includes harmonising the land-use attributes, combining time slices using QGIS union operations, assigning temporal transition codes, generating 13 final land-use classes, and linking those classes to SWAT management types. The full spatial input data can be found in: <https://doi.org/10.6084/m9.figshare.30856865>
+The process includes harmonising the land-use attributes, combining time slices using QGIS union operations, assigning temporal transition codes, generating 13 final land-use classes, and linking those classes to SWAT management types. The full spatial input data can be found in: <https://doi.org/10.6084/m9.figshare.30856865>
 
 1.2  Dynamic SWAT 2012 management (Workflow 2)
 A. Dynamic management changes
