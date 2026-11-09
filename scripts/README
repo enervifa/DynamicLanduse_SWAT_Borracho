@@ -1,1 +1,11 @@
 Scripts examples
+
+1. Prepare a valid SWAT 2012 project and identify HRU `.mgt` files.
+2. Confirm the SWAT LUSE codes used in your project.
+3. Prepare or select LUSE-specific management templates for Part A (see o mgt_LUSE.R).
+4. Identify the eligible forestry-conversion HRUs using the baseline map (in this case the code is ESC).
+5. Select the species-specific staggered-plantation routine (Pine or Eucalyptus).
+6. Set project input/output folders and random seed.
+7. Run the relevant pathway and write scenario-specific `.mgt` files to a separate output directory.
+8. This files can then be substituted in one model folder to run the specific scenario. 
+9. Compare original and modified schedules, checking operation counts, planting years, rotation sequences, and parameter values before running SWAT.
