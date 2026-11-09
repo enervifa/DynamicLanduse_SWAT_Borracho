@@ -33,8 +33,8 @@ This stage redistributes planting operations among years so that eligible HRUs d
 
 The precise target years, biomass mappings, randomisation and file-writing behaviour are defined in the individual scripts for each LUSE. 
 
-### R scripts included
-| Script | Current documented / observed role |
+### Scripts 
+| Script | Purpose |
 |---|---|
 | `scripts/mgt_AGRI.R` | Agricultural management templates, management-field replacements and a rice-specific branch for selected subbasins. |
 | `scripts/mgt_FORD.R` | Three `FORD` management-schedule variants and associated management-field updates. |
@@ -44,11 +44,6 @@ The precise target years, biomass mappings, randomisation and file-writing behav
 | `scripts/mgt_pine_change_planting_position.R` | Redistribution of Pine planting dates in `.mgt` schedules. |
 | `scripts/mgt_pine_scnearios.R` | Example of Pine scenario preparation, including `ESC` to `PINE` text changes and related `.mgt`, `.hru` and `.gw` file handling. |
 | `scripts/mgt_changeCN.R` | Additional CN2 lookup / update utility after changeing LUSE |
-
-##  GEE scripts 
-
-| Script | Purpose |
-|---|---|
 | `GEE_scripts/Patch_locations` | Uses MapBiomas Pampa annual classifications to identify persistent plantation and pasture pixels over the configured period and export masks. |
 | `GEE_scripts/PatchFinder` | Creates patch polygons and extracts LAI / ET time series for polygon means and centroid pixels. |
 
