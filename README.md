@@ -45,7 +45,7 @@ The precise target years, biomass mappings, randomisation and file-writing behav
 | `scripts/mgt_pine_scnearios.R` | Example of Pine scenario preparation, including `ESC` to `PINE` text changes and related `.mgt`, `.hru` and `.gw` file handling. |
 | `scripts/mgt_changeCN.R` | Additional CN2 lookup / update utility after changeing LUSE |
 
-## Google Earth Engine scripts
+##  GEE scripts 
 
 | Script | Purpose |
 |---|---|
